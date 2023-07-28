@@ -1,6 +1,6 @@
 .idea/
 .direnv/
 .venv/
-_*
+_[^_]*
 
 *.pyc
