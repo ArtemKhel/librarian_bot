@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "tg"
+name = "LibrariannBot"
 version = "0.1.0"
 description = ""
 authors = ["ArtemKhel <ArtemKhel@gmail.com>"]
@@ -14,7 +14,7 @@ python-telegram-bot = "^20.4"
 anytree = "2.8.0"
 
 [tool.poetry.scripts]
-tg = "src.main:main"
+libbot = "src.main:main"
 
 [build-system]
 requires = ["poetry-core"]

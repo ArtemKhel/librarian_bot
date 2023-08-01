@@ -17,9 +17,9 @@
         pkgs,
         ...
       }: {
-        packages.default = pkgs.poetry2nix.mkPoetryApplication {projectDir = ./.;};
+        packages.default = pkgs.poetry2nix.mkPoetryApplication {projectDir = self;};
 
-        apps.default.program = "${self.packages.${system}.default.outPath}/bin/tg";
+        apps.default.program = "${self.packages.${system}.default.outPath}/bin/libbot";
 
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs.python310Packages;
