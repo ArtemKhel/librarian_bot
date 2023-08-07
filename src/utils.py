@@ -1,9 +1,11 @@
 from typing import List, Union
 
 import anytree
-from anytree import Node, Resolver
+from anytree import Resolver
 from telegram import InlineKeyboardButton
 from telegram.ext import CommandHandler, ContextTypes
+
+from src.bot_types import *
 
 resolver = Resolver()
 
@@ -30,8 +32,21 @@ def _mkdir(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
         dir_: Node = resolver.get(pwd, dir_)
         return False
     except anytree.ChildResolverError:
-        Node(dir_, parent=pwd)
+        Directory(dir_, parent=pwd)
         return True
+
+
+def _rm(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
+    pwd: Node = context.user_data['PWD']
+    try:
+        dir_: Node = resolver.get(pwd, dir_)
+        if dir_ is None:
+            return False
+        dir_.parent = None
+        del dir_  # TODO: del?
+        return True
+    except anytree.ChildResolverError:
+        return False
 
 
 def command_handler(application, command):

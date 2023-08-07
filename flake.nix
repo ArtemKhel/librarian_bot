@@ -40,6 +40,7 @@
           packages = with pkgs; [
             (poetry2nix.mkPoetryEnv {projectDir = self;})
             poetry
+            sops
           ];
         };
       };
