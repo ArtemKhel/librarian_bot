@@ -41,6 +41,12 @@
             (poetry2nix.mkPoetryEnv {projectDir = self;})
             poetry
             sops
+            
+            alejandra
+            nodePackages.pyright
+            black
+            python310Packages.flake8
+            mypy
           ];
         };
       };

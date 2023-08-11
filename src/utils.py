@@ -11,7 +11,7 @@ resolver = Resolver()
 
 
 def chunks(lst, n=2):
-    return list(lst[i:i + n] for i in range(0, len(lst), n))
+    return list(lst[i : i + n] for i in range(0, len(lst), n))
 
 
 def _cd(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
@@ -59,12 +59,12 @@ def command_handler(application, command):
 
 
 def build_menu(
-        buttons: List[InlineKeyboardButton],
-        n_cols: int = 1,
-        header_buttons: Union[InlineKeyboardButton, List[InlineKeyboardButton]] = None,
-        footer_buttons: Union[InlineKeyboardButton, List[InlineKeyboardButton]] = None
+    buttons: List[InlineKeyboardButton],
+    n_cols: int = 1,
+    header_buttons: Union[InlineKeyboardButton, List[InlineKeyboardButton]] = None,
+    footer_buttons: Union[InlineKeyboardButton, List[InlineKeyboardButton]] = None,
 ) -> List[List[InlineKeyboardButton]]:
-    menu = [buttons[i:i + n_cols] for i in range(0, len(buttons), n_cols)]
+    menu = [buttons[i : i + n_cols] for i in range(0, len(buttons), n_cols)]
     if header_buttons:
         menu.insert(0, header_buttons if isinstance(header_buttons, list) else [header_buttons])
     if footer_buttons:
