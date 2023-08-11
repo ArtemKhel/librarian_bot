@@ -14,7 +14,7 @@ from telegram.ext import (
     PicklePersistence,
 )
 
-from nav_commands import *
+from src.nav_commands import *
 from src.bot_types import *
 from src.utils import _cd, chunks, _mkdir, _rm
 
@@ -33,8 +33,12 @@ async def post_init(app: Application) -> None:
         ]
     )
 
-
-persistence = PicklePersistence(filepath="_persistence")
+# TODO: reply buttons for delete/move
+data_folder = '/lib_bot/'
+xdg_data = os.environ.get("XDG_DATA_HOME", None) 
+if not os.path.exists(xdg_data + data_folder):
+    os.mkdir(xdg_data + data_folder)
+persistence = PicklePersistence(filepath=xdg_data + data_folder + "persistence")
 application = (
     ApplicationBuilder()
     .token(os.getenv("BOT_TOKEN"))
@@ -67,7 +71,7 @@ async def message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> State:
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> State:
     await context.bot.set_chat_menu_button(update.effective_chat.id, menu_button=MenuButtonCommands())
-    greeting = "Welcome to LibrariannBot 📚"
+    greeting = "Welcome to LibrarianBot 📚"
     tooltip = "start tooltip"
     if not context.user_data.get("INIT"):
         context.user_data["INIT"] = True

@@ -3,7 +3,7 @@ from anytree import Node, Resolver, RenderTree
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from src.main import State
+from src.bot_types import State
 
 
 async def cd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> State:
