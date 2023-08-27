@@ -1,7 +1,7 @@
 import logging
 import os
 
-from telegram import MenuButtonCommands, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import MenuButtonCommands, InlineKeyboardButton, InlineKeyboardMarkup, Update, ReplyKeyboardMarkup
 from telegram.error import BadRequest
 from telegram.ext import (
     Application,
@@ -12,10 +12,11 @@ from telegram.ext import (
     filters,
     CallbackQueryHandler,
     PicklePersistence,
+    ContextTypes,
 )
 
-from src.nav_commands import *
 from src.bot_types import *
+# from src.nav import *
 from src.utils import _cd, chunks, _mkdir, _rm
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -78,7 +79,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> State:
         root = Directory("root")
         context.user_data["PWD"] = root
         context.user_data["QUEUE"] = []
-    await update.message.reply_markdown_v2(text=f"*{greeting}*\n_{tooltip}_")
+    await update.message.reply_markdown_v2(text=f"*{greeting}*")
     return State.WAITING
 
 
@@ -96,8 +97,8 @@ def make_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
         + [
             [
                 InlineKeyboardButton(text="list", callback_data="/ls"),
-                InlineKeyboardButton(text="create", callback_data="/mkdir"),
-                InlineKeyboardButton(text="move", callback_data="/mv"),
+                InlineKeyboardButton(text="mkdir", callback_data="/mkdir"),
+                # InlineKeyboardButton(text="move", callback_data="/mv"),
                 InlineKeyboardButton(text="remove", callback_data="/rm"),
             ],
             [InlineKeyboardButton(text="..", callback_data="..")],
@@ -175,7 +176,6 @@ async def cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> State:
             return State.RM
 
         case "/save":  # TODO: somehow catch all messages in media groups
-
             def gen_name(x: str, max_len: int = 50) -> str:
                 return x[:max_len].rsplit(maxsplit=1)[0] + "..." if len(x) > max_len else x
 
@@ -209,9 +209,11 @@ async def cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> State:
             ):
                 try:
                     await msg.forward(update.effective_chat.id)
+                    await keyboard(update, context)
                 except BadRequest:
                     await context.bot.send_message(
-                        chat_id=update.effective_chat.id, text=f"Looks like `{msg_name}` was deleted"
+                        chat_id=update.effective_chat.id,
+                        text=f"Looks like `{msg_name}` was deleted"
                     )
 
 
@@ -219,7 +221,7 @@ async def mkdir_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> S
     if _mkdir(context, update.message.text):
         return await keyboard(update, context)
     else:
-        await update.message.reply_text(text="exist/invalid,try again")
+        await update.message.reply_text(text="exist/invalid")
         return State.MKDIR
 
 
@@ -227,7 +229,7 @@ async def rm_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Stat
     if _rm(context, update.message.text):
         return await keyboard(update, context)
     else:
-        await update.message.reply_text(text="exist/invalid,try again")
+        await update.message.reply_text(text="exist/invalid")
         return State.RM
 
 
@@ -238,26 +240,20 @@ async def save_with_name_handler(update: Update, context: ContextTypes.DEFAULT_T
         SavedMessage(name=update.message.text, parent=pwd, data=msg)
         return await keyboard(update, context)
     else:
-        await update.message.reply_text(text="exist/invalid,try again")
+        await update.message.reply_text(text="exist/invalid")
         return State.SAVE
 
 
 def main() -> None:
     conv_handler = ConversationHandler(
-        # entry_points=[CommandHandler('start', start())],
         entry_points=[
             CommandHandler("start", start),
         ],
         states={
             State.WAITING: [
                 CommandHandler("kb", keyboard),
-                # CommandHandler('cd', cd),
-                # CommandHandler('mkdir', mkdir),
-                # CommandHandler('pwd', pwd),
-                # CommandHandler('ls', ls),
                 CallbackQueryHandler(keyboard_callback, pattern="^.*$"),
                 MessageHandler(filters=~filters.COMMAND & filters.FORWARDED, callback=message),
-                # Should be in fallbacks?
             ],
             State.MKDIR: [MessageHandler(filters=filters.TEXT & ~filters.COMMAND, callback=mkdir_handler)],
             State.RM: [MessageHandler(filters=filters.TEXT & ~filters.COMMAND, callback=rm_handler)],

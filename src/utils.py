@@ -11,23 +11,23 @@ resolver = Resolver()
 
 
 def chunks(lst, n=2):
-    return list(lst[i : i + n] for i in range(0, len(lst), n))
+    return list(lst[i:i + n] for i in range(0, len(lst), n))
 
 
 def _cd(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
-    pwd: Node = context.user_data['PWD']
+    pwd: Node = context.user_data["PWD"]
     try:
         dir_: Node = resolver.get(pwd, dir_)
         if dir_ is None:
             return False
-        context.user_data['PWD'] = dir_
+        context.user_data["PWD"] = dir_
         return True
     except anytree.ChildResolverError:
         return False
 
 
 def _mkdir(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
-    pwd: Node = context.user_data['PWD']
+    pwd: Node = context.user_data["PWD"]
     try:
         dir_: Node = resolver.get(pwd, dir_)
         return False
@@ -37,7 +37,7 @@ def _mkdir(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
 
 
 def _rm(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
-    pwd: Node = context.user_data['PWD']
+    pwd: Node = context.user_data["PWD"]
     try:
         dir_: Node = resolver.get(pwd, dir_)
         if dir_ is None:
