@@ -1,43 +1,51 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
-  outputs = inputs@{
+  outputs = inputs @ {
     self,
     nixpkgs,
     ...
-  }: let
-    supportedSystems = ["x86_64-linux"];
-    forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-    pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
-  in {
-    packages = forAllSystems (system: {
-      default = pkgs.${system}.poetry2nix.mkPoetryApplication {projectDir = self;};
-    });
+  }:
+    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = ["x86_64-linux"];
 
-    devShells = forAllSystems (system: {
-      default = pkgs.${system}.mkShellNoCC {
-        buildInputs = with pkgs.${system}.python310Packages; [ python venvShellHook ];
-        venvDir = "./.venv";
-        postVenvCreation = ''
-          unset SOURCE_DATE_EPOCH
-          poetry env use .venv/bin/python
-          poetry install
-        '';
-        postShellHook = ''
-          unset SOURCE_DATE_EPOCH
-          poetry env info
-          export BOT_TOKEN=$(sops --decrypt secrets.yaml | yq -r '.tg_bot_token')
-        '';
+      perSystem = {
+        system,
+        pkgs,
+        ...
+      }: {
+        packages.default = pkgs.poetry2nix.mkPoetryApplication {projectDir = self;};
 
-        packages = with pkgs.${system}; [
-          (poetry2nix.mkPoetryEnv {projectDir = self;})
-          poetry
-          sops
-          yq
-        ];
+        apps.default.program = "${self.packages.${system}.default.outPath}/bin/libbot";
+
+        devShells.default = pkgs.mkShell {
+          buildInputs = with pkgs.python310Packages;
+            [python venvShellHook]
+            ++ (with pkgs; [sops yq poetry]);
+          venvDir = "./.venv";
+          postVenvCreation = ''
+            unset SOURCE_DATE_EPOCH
+            poetry env use .venv/bin/python
+            poetry install
+          '';
+          postShellHook = ''
+            unset SOURCE_DATE_EPOCH
+            poetry env info
+            export BOT_TOKEN=$(sops --decrypt secrets.yaml | yq -r '.tg_bot_token')
+          '';
+
+          packages = with pkgs; [
+            (poetry2nix.mkPoetryEnv {projectDir = self;})
+            poetry
+            sops
+            
+            alejandra
+            black
+          ];
+        };
       };
-    });
-  };
+    };
 }
