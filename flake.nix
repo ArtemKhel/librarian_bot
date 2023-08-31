@@ -43,10 +43,7 @@
             sops
             
             alejandra
-            nodePackages.pyright
             black
-            python310Packages.flake8
-            mypy
           ];
         };
       };

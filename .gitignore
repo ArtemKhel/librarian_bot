@@ -2,6 +2,7 @@
 .direnv/
 .venv/
 result
-_[^_]*
 
 *.pyc
+
+_[^_]*

@@ -11,10 +11,10 @@ resolver = Resolver()
 
 
 def chunks(lst, n=2):
-    return list(lst[i:i + n] for i in range(0, len(lst), n))
+    return list(lst[i : i + n] for i in range(0, len(lst), n))
 
 
-def _cd(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
+def cd(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
     pwd: Node = context.user_data["PWD"]
     try:
         dir_: Node = resolver.get(pwd, dir_)
@@ -26,7 +26,7 @@ def _cd(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
         return False
 
 
-def _mkdir(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
+def mkdir(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
     pwd: Node = context.user_data["PWD"]
     try:
         dir_: Node = resolver.get(pwd, dir_)
@@ -36,7 +36,7 @@ def _mkdir(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
         return True
 
 
-def _rm(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
+def rm(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
     pwd: Node = context.user_data["PWD"]
     try:
         dir_: Node = resolver.get(pwd, dir_)
@@ -44,6 +44,17 @@ def _rm(context: ContextTypes.DEFAULT_TYPE, dir_: str) -> bool:
             return False
         dir_.parent = None
         del dir_  # TODO: del?
+        return True
+    except anytree.ChildResolverError:
+        return False
+
+
+def contains(context: ContextTypes.DEFAULT_TYPE, name: str) -> bool:
+    pwd: Node = context.user_data["PWD"]
+    try:
+        name: Node = resolver.get(pwd, name)
+        if name is None:
+            return False
         return True
     except anytree.ChildResolverError:
         return False

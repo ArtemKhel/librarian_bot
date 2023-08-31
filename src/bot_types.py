@@ -1,5 +1,4 @@
-# from enum import Enum
-import enum
+from enum import Enum
 
 from anytree import Node
 from telegram import Message
@@ -7,7 +6,7 @@ from telegram import Message
 START, ADD = range(2)
 
 
-class State(enum.Enum):
+class State(Enum):
     WAITING, MKDIR, RM, SAVE = range(100, 100 + 4)
 
 
