@@ -35,6 +35,7 @@ async def post_init(app: Application) -> None:
 # TODO: show selected only
 # TODO: fix albums (save only first)
 # TODO: localization?
+# TODO: fix name generation
 
 data_folder = '/lib_bot/'
 xdg_data = os.environ.get('XDG_DATA_HOME', '/var/lib/')
